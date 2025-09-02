@@ -1,4 +1,8 @@
 const { app, BrowserWindow } = require('electron');
+
+// --> 強制停用硬體加速 <--
+app.disableHardwareAcceleration();
+
 const path = require('path');
 
 function createWindow() {
