@@ -1,4 +1,16 @@
 const { app, BrowserWindow } = require('electron');
+const Store = require('electron-store');
+const crypto = require('crypto');
+
+const store = new Store();
+
+// Generate and store a unique device ID if it doesn't exist.
+let deviceId = store.get('deviceId');
+if (!deviceId) {
+  // Using Node.js's built-in crypto module to generate a UUID.
+  deviceId = crypto.randomUUID();
+  store.set('deviceId', deviceId);
+}
 
 // --> 強制停用硬體加速 <--
 app.disableHardwareAcceleration();
@@ -19,7 +31,7 @@ function createWindow() {
 
   // and load the index.html of the app.
   // mainWindow.loadFile('index.html');
-  mainWindow.loadURL('https://mq-cms.adler-lei.workers.dev/display');
+  mainWindow.loadURL(`https://mq-cms.adler-lei.workers.dev/display?deviceId=${deviceId}`);
 
   // 當頁面內容載入完成後，執行 JavaScript 來隱藏滑鼠游標
   mainWindow.webContents.on('did-finish-load', () => {
