@@ -1,11 +1,24 @@
 const { app, BrowserWindow } = require('electron');
+const Store = require('electron-store');
+const { v4: uuidv4 } = require('uuid');
 
 // --> 強制停用硬體加速 <--
 app.disableHardwareAcceleration();
 
 const path = require('path');
+const store = new Store();
 
 function createWindow() {
+  // Generate or retrieve device ID
+  let deviceId = store.get('deviceId');
+  if (!deviceId) {
+    deviceId = uuidv4();
+    store.set('deviceId', deviceId);
+    console.log('Generated new device ID:', deviceId);
+  } else {
+    console.log('Using existing device ID:', deviceId);
+  }
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     // width: 800,
@@ -19,7 +32,7 @@ function createWindow() {
 
   // and load the index.html of the app.
   // mainWindow.loadFile('index.html');
-  mainWindow.loadURL('https://mq-cms.adler-lei.workers.dev/display');
+  mainWindow.loadURL(`https://mq-cms.adler-lei.workers.dev/display?deviceId=${deviceId}`);
 
   // 當頁面內容載入完成後，執行 JavaScript 來隱藏滑鼠游標
   mainWindow.webContents.on('did-finish-load', () => {
