@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 app.disableHardwareAcceleration();
 
 const path = require('path');
-const store = new Store();
+const store = new Store.default();
 
 function createWindow() {
   // Generate or retrieve device ID
