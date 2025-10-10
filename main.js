@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, session } = require('electron');
 const Store = require('electron-store');
 const { v4: uuidv4 } = require('uuid');
 
@@ -26,20 +26,47 @@ function createWindow() {
     fullscreen: true, // 新增這一行來啟用全螢幕
     backgroundColor: '#000000',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      // 停用緩存以確保總是載入最新版本
+      cache: false
     }
   });
 
-  // and load the index.html of the app.
-  // mainWindow.loadFile('index.html');
-  mainWindow.loadURL(`https://mq-cms.adler-lei.workers.dev/display?deviceId=${deviceId}`);
+  // 清除所有緩存（每次啟動時）
+  console.log('Clearing all caches...');
+  session.defaultSession.clearCache().then(() => {
+    console.log('Cache cleared successfully');
+  }).catch(err => {
+    console.error('Failed to clear cache:', err);
+  });
+
+  // 也清除 Storage Data
+  session.defaultSession.clearStorageData({
+    storages: ['cachestorage', 'serviceworkers']
+  }).then(() => {
+    console.log('Storage data cleared');
+  }).catch(err => {
+    console.error('Failed to clear storage:', err);
+  });
+
+  // 修正 URL：添加 .html 擴展名
+  const displayUrl = `https://mq-cms.adler-lei.workers.dev/display.html?deviceId=${deviceId}`;
+  console.log('Loading URL:', displayUrl);
+  
+  mainWindow.loadURL(displayUrl);
 
   // 當頁面內容載入完成後，執行 JavaScript 來隱藏滑鼠游標
   mainWindow.webContents.on('did-finish-load', () => {
+    console.log('Page loaded successfully');
     mainWindow.webContents.executeJavaScript('document.body.style.cursor = "none";');
   });
 
-  // Open the DevTools.
+  // 監聽頁面載入錯誤
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load page:', errorCode, errorDescription);
+  });
+
+  // Open the DevTools (可選 - 用於調試)
   // mainWindow.webContents.openDevTools();
 }
 
