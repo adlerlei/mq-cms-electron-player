@@ -26,9 +26,10 @@ function createWindow() {
     fullscreen: true, // 新增這一行來啟用全螢幕
     backgroundColor: '#000000',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       // 停用緩存以確保總是載入最新版本
-      cache: false
+      cache: false,
+      nodeIntegration: false,
+      contextIsolation: true
     }
   });
 
